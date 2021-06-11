@@ -7,10 +7,10 @@ def ref_paths(lab_dir, audio_dir):
     """
     
     # get anotation paths
-    lab_paths = paths(lab_dir, '.lab')
+    lab_paths = read_paths(lab_dir, '.lab')
     
     # traverse audio paths
-    audio_paths = paths(audio_dir, '.flac')
+    audio_paths = read_paths(audio_dir, '.flac')
 
     ref = {}
     # find maching paths
@@ -27,7 +27,7 @@ def ref_paths(lab_dir, audio_dir):
         
     return ref
 
-def paths(filedir, file_extension):
+def read_paths(filedir, file_extension):
 
     paths = []
     for root, dir, files in os.walk(filedir):
@@ -36,3 +36,56 @@ def paths(filedir, file_extension):
                 paths.append(os.path.join(root, name))
 
     return paths
+
+def load_lab(dirs):
+
+    lab_data = {}
+    for lab in dirs:
+
+        with open(lab, "r") as f:
+            data = []
+            while True:
+
+                line = f.readline()
+                if not line: #if EOF
+                    break
+
+                line = line.split()
+
+                # convert start and end time string to float
+                line[0] = float(line[0])
+                line[1] = float(line[1])
+
+                # merge labels
+                if 'silence' in line[2]:
+                    line[2] = 'silence'
+                elif 'intro' in line[2]:
+                    line[2] = 'intro'
+                elif 'verse' in line[2]:
+                    line[2] = 'verse'
+                elif 'refrain' in line[2]:
+                    line[2] = 'refrain'
+                elif 'instrumental' in line[2]:
+                    line[2] = 'instrumental'
+                elif ('bridge' in line[2]) or ('birdge' in line[2]):
+                    line[2] = 'bridge'
+                elif 'outro' in line[2]:
+                    line[2] = 'outro'
+                elif 'break' in line[2]:
+                    line[2] = 'break'
+                elif 'build' in line[2]:
+                    line[2] = 'build'
+                elif 'ad-lib' in line[2]:
+                    line[2] = 'ad-lib'
+                elif 'middle' in line[2]:
+                    line[2] = 'middle'
+                else:
+                    line[2] = 'OTHER'
+
+                data.append(line)
+
+        lab_data[os.path.basename(lab)[:-4]] = data
+    
+    return lab_data
+
+print(load_lab(read_paths('/Users/chris/Google Drive/Publication Files/ICMC2021/Datasets/isophonics_MJ/seglab', '.lab')))
