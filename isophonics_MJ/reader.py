@@ -6,32 +6,33 @@ def ref_paths(lab_dir, audio_dir):
     e.g. querry audio path to get annotation path and vice versa
     """
     
-    # traverse anotation paths
-    lab_paths = []
-    for root, dir, files in os.walk(lab_dir):
-        for name in files:
-            if '.lab' in name:
-                lab_paths.append(os.path.join(root, name))
+    # get anotation paths
+    lab_paths = paths(lab_dir, '.lab')
     
     # traverse audio paths
-    audio_names_paths = []
-    for root, dir, files in os.walk(audio_dir):
-        for name in files:
-            if '.flac' in name:
-                audio_names_paths.append([name[4:-5], os.path.join(root, name)]) # parsed name & path
+    audio_paths = paths(audio_dir, '.flac')
 
     ref = {}
     # find maching paths
-    for audio in audio_names_paths:
+    for audio in audio_paths:
         for lab in lab_paths:
             flag = 0 #flag for entries with no match
-            if audio[0] in lab:
-                ref[audio[1]] = lab
-                ref[lab] = audio[1]
+            if os.path.basename(audio)[4:-5] in lab:
+                ref[os.path.basename(audio)] = lab
+                ref[lab] = os.path.basename(audio)
                 flag = 1
                 break
         if flag == 0:
-            print("No match for:", audio[0])
+            print("No match for:", os.path.basename(audio))
         
     return ref
 
+def paths(filedir, file_extension):
+
+    paths = []
+    for root, dir, files in os.walk(filedir):
+        for name in files:
+            if file_extension in name:
+                paths.append(os.path.join(root, name))
+
+    return paths
