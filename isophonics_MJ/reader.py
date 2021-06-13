@@ -87,5 +87,3 @@ def load_lab(dirs):
         lab_data[os.path.basename(lab)[:-4]] = data
     
     return lab_data
-
-print(load_lab(read_paths('/Users/chris/Google Drive/Publication Files/ICMC2021/Datasets/isophonics_MJ/seglab', '.lab')))
