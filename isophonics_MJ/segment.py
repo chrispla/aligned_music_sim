@@ -87,7 +87,7 @@ def segment(y, sr, kmin, kmax):
         #debug
         if np.isnan(np.sum(Xs)):
             print('woops')
-        KM = sklearn.cluster.KMeans(n_clusters=k, n_init=50, max_iter=500)
+        KM = KMeans(n_clusters=k, n_init=50, max_iter=500)
         all_seg_ids.append(KM.fit_predict(Xs))
     
     #Formatting as [start position, length]

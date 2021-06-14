@@ -1,4 +1,6 @@
 import os
+import numpy as np
+from librosa import time_to_frames
 
 def ref_paths(lab_dir, audio_dir):
     """
@@ -87,3 +89,45 @@ def load_lab(dirs):
         lab_data[os.path.basename(lab)[:-4]] = data
     
     return lab_data
+
+def vectorize(lab, sr, start_f, end_f):
+    """
+    lab: formatted lab data ([start, end, label])
+    sr: sampling rate
+    start_f: desired starting frame
+    end_f: desired ending frame (can be larger than total frames, in which case zero-paddin is done)
+
+    Returns vector of labels at each frame for the desired frame interval
+    """
+
+    #create empty array with length given by max value in annotations file
+    len_f = time_to_frames(lab[-1][1], sr=sr, hop_length=1) #get length in frames
+    v = np.empty((len_f), dtype=object) #None entries
+
+    #for every segment
+    for seg in lab:
+
+        #get segment data
+        seg_start_f = time_to_frames(seg[0], sr=sr, hop_length=1)
+        seg_end_f = time_to_frames(seg[1], sr=sr, hop_length=1)
+        label = seg[2]
+
+        #for every frame within that segment
+        for i in range(seg_end_f-seg_start_f):
+            #insert label
+            v[seg_start_f+i] = label
+
+    print("None values at:", np.argwhere(v==None))
+
+    #if frame interval larger than song
+    """note: this assumes that if you're padding you're doing it 
+    on the entire audio file, so start_f = 0"""
+    if end_f > len_f:
+        v_pad = np.empty((end_f), dtype=object)
+        v_pad[:len_f] = v
+        return v_pad
+
+    #if equal or smaller
+    else:
+        v_trunc = v[start_f:end_f]
+        return v_trunc
